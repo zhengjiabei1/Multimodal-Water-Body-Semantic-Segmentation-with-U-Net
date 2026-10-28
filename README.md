@@ -40,6 +40,15 @@ Key findings:
 - MNDWI reduces false positives caused by building shadows, while NIR improves
   the detection of fragmented and narrow water bodies.
 
+## Workflow
+
+The overall technical route is summarised below: imagery selection and
+preprocessing, water index calculation and label preparation, dataset
+construction, U-Net training with four input configurations, inference, and
+accuracy and error analysis.
+
+![Technical route](docs/figures/technical_route.png)
+
 ## Study area
 
 The study area is located at the southwestern margin of the Sichuan Basin,
@@ -87,18 +96,7 @@ bilinear interpolation before index calculation.
 3. Crop to the study area, align all bands to a common grid, and scale surface
    reflectance to the range 0-1.
 
-```mermaid
-flowchart TD
-    A[Sentinel-2 L2A<br/>5 scenes, cloud cover < 10%] --> B[QA60 + SCL cloud and shadow masking]
-    B --> C[Cloud-sorted mosaic and normalisation]
-    C --> D[NDWI and MNDWI]
-    C --> E[Reference label preparation<br/>and manual correction]
-    D --> F[256 x 256 patches<br/>stride 128]
-    E --> F
-    F --> G[Random 70 / 15 / 15 split]
-    G --> H[U-Net with input schemes A-D]
-    H --> I[Accuracy, Precision, Recall,<br/>IoU, F1, Kappa]
-```
+
 
 ### Water indices
 
@@ -395,6 +393,7 @@ Probability fusion and confidence-guided refinement bring only marginal gains.
 │   ├── figures/
 │   │   ├── model_comparison.py
 │   │   ├── qualitative_examples.py
+│   │   ├── technical_route.py
 │   │   └── training_curves.py
 │   ├── build_dataset.py           # patch extraction and train/val/test split
 │   ├── evaluate.py                # metrics and post-processing
@@ -504,6 +503,7 @@ artefacts. It writes a probability map and a binary water mask as GeoTIFF.
 ```bash
 python src/figures/training_curves.py
 python src/figures/model_comparison.py
+python src/figures/technical_route.py
 python src/figures/qualitative_examples.py \
   --image data/raw/Leshan_RGB.tif \
   --stack data/raw/Leshan_AllBands.tif \
