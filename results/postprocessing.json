@@ -1,0 +1,30 @@
+{
+  "No post-processing": {
+    "Accuracy": 0.986763,
+    "Precision": 0.835059,
+    "Recall": 0.773493,
+    "IoU": 0.670981,
+    "F1": 0.803098
+  },
+  "Threshold filtering": {
+    "Accuracy": 0.982479,
+    "Precision": 0.91988,
+    "Recall": 0.545455,
+    "IoU": 0.520717,
+    "F1": 0.684831
+  },
+  "Probability fusion": {
+    "Accuracy": 0.986824,
+    "Precision": 0.83833,
+    "Recall": 0.771187,
+    "IoU": 0.671344,
+    "F1": 0.803358
+  },
+  "Confidence-guided refinement": {
+    "Accuracy": 0.986856,
+    "Precision": 0.840447,
+    "Recall": 0.76944,
+    "IoU": 0.671371,
+    "F1": 0.803377
+  }
+}

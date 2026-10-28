@@ -1,0 +1,30 @@
+{
+  "A: RGB": {
+    "Accuracy": 0.984567,
+    "Precision": 0.808532,
+    "Recall": 0.730879,
+    "IoU": 0.623044,
+    "F1": 0.767747
+  },
+  "B: RGB + NIR": {
+    "Accuracy": 0.986356,
+    "Precision": 0.830453,
+    "Recall": 0.765301,
+    "IoU": 0.661885,
+    "F1": 0.796547
+  },
+  "C: RGB + NIR + MNDWI": {
+    "Accuracy": 0.986763,
+    "Precision": 0.835059,
+    "Recall": 0.773493,
+    "IoU": 0.670981,
+    "F1": 0.803098
+  },
+  "D: All channels": {
+    "Accuracy": 0.986786,
+    "Precision": 0.84662,
+    "Recall": 0.758849,
+    "IoU": 0.667132,
+    "F1": 0.800335
+  }
+}
