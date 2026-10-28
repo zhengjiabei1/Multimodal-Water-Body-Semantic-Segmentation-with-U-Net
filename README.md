@@ -176,6 +176,22 @@ pip install -r requirements.txt
 PyTorch is selected automatically (`cuda`, then `mps`, then `cpu`). Pass
 `--device` to override it.
 
+### Pretrained checkpoints
+
+The four trained models are available in the
+[v1.0.0 release](https://github.com/zhengjiabei1/Multimodal-Water-Body-Semantic-Segmentation-with-U-Net/releases/tag/v1.0.0).
+Download them into `checkpoints/`:
+
+```
+checkpoints/unet_A.pth   # RGB
+checkpoints/unet_B.pth   # RGB + NIR
+checkpoints/unet_C.pth   # RGB + NIR + MNDWI (best F1 and IoU)
+checkpoints/unet_D.pth   # all channels
+```
+
+Each file is a PyTorch checkpoint containing the model state, scheme id,
+channel count, best epoch and validation loss.
+
 ### 1. Prepare the data
 
 Run `gee/water_extraction.js` in the Earth Engine Code Editor and start the
@@ -249,8 +265,9 @@ python src/figures/qualitative_examples.py \
 
 ## Data notes
 
-- Raw imagery and model checkpoints are not committed because of their size.
-  Each checkpoint is about 124 MB; the patch archive is several gigabytes.
+- Raw imagery is not committed because of its size. The trained checkpoints are
+  distributed through the v1.0.0 release rather than the Git history; each one
+  is about 124 MB.
 - The reference mask is the JRC Global Surface Water `max_extent` layer, which
   represents the maximum observed water extent. It is not acquired on the same
   date as the Sentinel-2 image, so seasonal water and small water bodies may be
