@@ -179,11 +179,19 @@ def main() -> None:
         )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    rounded_models = {
+        name: {metric: round(value, 6) for metric, value in scores.items()}
+        for name, scores in model_results.items()
+    }
+    rounded_post = {
+        name: {metric: round(value, 6) for metric, value in scores.items()}
+        for name, scores in post_results.items()
+    }
     (args.output_dir / "model_comparison.json").write_text(
-        json.dumps(model_results, indent=2)
+        json.dumps(rounded_models, indent=2)
     )
     (args.output_dir / "postprocessing.json").write_text(
-        json.dumps(post_results, indent=2)
+        json.dumps(rounded_post, indent=2)
     )
     print(f"\nResults written to {args.output_dir}")
 

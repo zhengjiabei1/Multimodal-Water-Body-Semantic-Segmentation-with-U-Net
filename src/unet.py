@@ -12,7 +12,7 @@ class DoubleConv(nn.Module):
 
     def __init__(self, in_channels: int, out_channels: int) -> None:
         super().__init__()
-        self.block = nn.Sequential(
+        self.conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
@@ -22,7 +22,7 @@ class DoubleConv(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.block(x)
+        return self.conv(x)
 
 
 class UNet(nn.Module):
@@ -39,10 +39,10 @@ class UNet(nn.Module):
         features: tuple[int, ...] = (64, 128, 256, 512),
     ) -> None:
         super().__init__()
-        self.encoders = nn.ModuleList()
+        self.encoder = nn.ModuleList()
         channels = in_channels
         for feature in features:
-            self.encoders.append(DoubleConv(channels, feature))
+            self.encoder.append(DoubleConv(channels, feature))
             channels = feature
 
         self.pool = nn.MaxPool2d(2, 2)
@@ -56,12 +56,12 @@ class UNet(nn.Module):
             )
             self.decoders.append(DoubleConv(feature * 2, feature))
 
-        self.head = nn.Conv2d(features[0], 1, kernel_size=1)
+        self.final = nn.Conv2d(features[0], 1, kernel_size=1)
         self.activation = nn.Sigmoid()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         skips: list[torch.Tensor] = []
-        for encoder in self.encoders:
+        for encoder in self.encoder:
             x = encoder(x)
             skips.append(x)
             x = self.pool(x)
@@ -77,4 +77,4 @@ class UNet(nn.Module):
             x = torch.cat([skip, x], dim=1)
             x = decoder(x)
 
-        return self.activation(self.head(x))
+        return self.activation(self.final(x))

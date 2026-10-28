@@ -66,7 +66,8 @@ NDWI = (B3 - B8) / (B3 + B8) and MNDWI = (B3 - B11) / (B3 + B11).
 
 ## Results
 
-Test set: 344 patches, 3.49% water pixels.
+Test set: 344 patches, 3.49% water pixels. All numbers below are reproduced
+by `src/evaluate.py` with the released checkpoints.
 
 ### U-Net input comparison
 
@@ -189,8 +190,9 @@ checkpoints/unet_C.pth   # RGB + NIR + MNDWI (best F1 and IoU)
 checkpoints/unet_D.pth   # all channels
 ```
 
-Each file is a PyTorch checkpoint containing the model state, scheme id,
-channel count, best epoch and validation loss.
+Each file contains the model state dict. The input configuration is recovered
+automatically from the tensor shapes during inference, or can be supplied with
+`--scheme`.
 
 ### 1. Prepare the data
 

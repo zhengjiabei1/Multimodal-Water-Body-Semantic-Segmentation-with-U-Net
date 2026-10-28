@@ -112,17 +112,31 @@ def main() -> None:
     checkpoint = torch.load(
         args.checkpoint, map_location=device, weights_only=True
     )
+    state = checkpoint.get("model_state_dict", checkpoint)
     scheme_id = args.scheme or checkpoint.get("scheme")
     if scheme_id not in INPUT_SCHEMES:
+        # Older checkpoints store only the state dict; recover the number of
+        # input channels from the first encoder convolution.
+        for key, value in state.items():
+            if key.endswith(("encoder.0.conv.0.weight", "encoders.0.block.0.weight")):
+                in_channels = value.shape[1]
+                scheme_id = next(
+                    (
+                        key
+                        for key, config in INPUT_SCHEMES.items()
+                        if len(config["channels"]) == in_channels
+                    ),
+                    None,
+                )
+                break
+    if scheme_id not in INPUT_SCHEMES:
         raise SystemExit(
-            "The scheme could not be read from the checkpoint. "
-            "Please pass --scheme explicitly."
+            "The scheme could not be determined. Please pass --scheme explicitly."
         )
     scheme = INPUT_SCHEMES[scheme_id]
     print(f"Scheme {scheme_id}: {scheme['name']}")
 
     model = UNet(in_channels=len(scheme["channels"])).to(device)
-    state = checkpoint.get("model_state_dict", checkpoint)
     model.load_state_dict(state)
     model.eval()
 
