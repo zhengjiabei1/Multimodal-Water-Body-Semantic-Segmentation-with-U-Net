@@ -93,12 +93,16 @@ def apply_postprocessing(
 
 def print_table(title: str, results: dict[str, dict[str, float]]) -> None:
     print(f"\n{title}")
-    print(f"{'Method':<32}{'Acc':>8}{'Prec':>8}{'Rec':>8}{'IoU':>8}{'F1':>8}")
-    print("-" * 72)
+    print(
+        f"{'Method':<32}{'Acc':>8}{'Prec':>8}{'Rec':>8}"
+        f"{'IoU':>8}{'F1':>8}{'Kappa':>8}"
+    )
+    print("-" * 80)
     for name, metrics in results.items():
         print(
             f"{name:<32}{metrics['Accuracy']:>8.4f}{metrics['Precision']:>8.4f}"
-            f"{metrics['Recall']:>8.4f}{metrics['IoU']:>8.4f}{metrics['F1']:>8.4f}"
+            f"{metrics['Recall']:>8.4f}{metrics['IoU']:>8.4f}"
+            f"{metrics['F1']:>8.4f}{metrics['Kappa']:>8.4f}"
         )
 
 

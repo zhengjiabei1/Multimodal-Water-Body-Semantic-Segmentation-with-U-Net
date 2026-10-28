@@ -74,6 +74,10 @@ def main() -> None:
             f"F1={metrics['F1']:.4f}  IoU={metrics['IoU']:.4f}"
         )
 
+    results = {
+        name: {metric: round(value, 6) for metric, value in scores.items()}
+        for name, scores in results.items()
+    }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2))
     print(f"Results written to {args.output}")

@@ -1,18 +1,20 @@
 {
   "NDWI": {
     "threshold": 0.1,
-    "Accuracy": 0.9802,
-    "Precision": 0.8154,
-    "Recall": 0.5584,
-    "IoU": 0.4957,
-    "F1": 0.6628
+    "Accuracy": 0.980175,
+    "Precision": 0.815404,
+    "Recall": 0.558348,
+    "IoU": 0.495692,
+    "F1": 0.662826,
+    "Kappa": 0.652982
   },
   "MNDWI": {
     "threshold": 0.05,
-    "Accuracy": 0.9806,
-    "Precision": 0.8317,
-    "Recall": 0.5561,
-    "IoU": 0.4998,
-    "F1": 0.6665
+    "Accuracy": 0.980578,
+    "Precision": 0.831656,
+    "Recall": 0.556062,
+    "IoU": 0.499805,
+    "F1": 0.666493,
+    "Kappa": 0.656897
   }
 }

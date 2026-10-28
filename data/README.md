@@ -1,7 +1,8 @@
 # Data
 
 Raw satellite imagery and the processed patch archive are not stored in this
-repository. This page documents the expected layout and band order.
+repository. This page documents the expected layout, band order and label
+workflow.
 
 ## Expected files
 
@@ -19,6 +20,13 @@ All three raw rasters are exported by `gee/water_extraction.js` with a 10 m
 grid, EPSG:32648 (UTM zone 48N), over the rectangle
 `[103.40, 29.20, 104.10, 29.80]`.
 
+## Imagery
+
+Five Sentinel-2 Level-2A scenes from August-September 2025 with cloud cover
+below 10% were selected for the study. Each scene was masked with QA60 and SCL,
+and the masked scenes were sorted by cloud cover and mosaicked so that clearer
+observations fill cloud gaps. Surface reflectance is scaled to the range 0-1.
+
 ## Channel order
 
 `Leshan_AllBands.tif` contains seven float32 channels:
@@ -33,17 +41,20 @@ grid, EPSG:32648 (UTM zone 48N), over the rectangle
 | 5 | NDWI | (B3 - B8) / (B3 + B8) |
 | 6 | MNDWI | (B3 - B11) / (B3 + B11) |
 
-Reflectance values are scaled to the range 0-1.
+B11 has a native resolution of 20 m and is resampled to 10 m before MNDWI is
+computed.
 
 ## Reference mask
 
-`Leshan_JRC_WaterLabel.tif` is derived from the JRC Global Surface Water
-`max_extent` layer. Pixels with a value greater than 0.5 are treated as water
-in `src/build_dataset.py`.
+`Leshan_JRC_WaterLabel.tif` is the initial binary water reference. It is based
+on the JRC Global Surface Water maximum-extent layer and was inspected and
+corrected in QGIS against the original Sentinel-2 imagery, the NDWI/MNDWI maps
+and high-resolution basemaps. Pixels with a value greater than 0.5 are treated
+as water in `src/build_dataset.py`.
 
-The mask represents the maximum observed water extent and is not
-date-matched to the Sentinel-2 acquisition. See the data notes in the main
-README for the implications.
+The JRC maximum extent is not date-matched to the Sentinel-2 acquisition, so
+seasonal water and small water bodies may be labelled inconsistently. Manual
+correction reduces, but does not eliminate, this uncertainty.
 
 ## Patch archive
 
@@ -57,4 +68,6 @@ X_test,  y_test
 ```
 
 `X_*` has shape `(N, 7, 256, 256)` and `y_*` has shape `(N, 256, 256)`.
-Patches containing NaN values are discarded.
+Patches containing NaN values are discarded. The random split uses 70% for
+training, 15% for validation and 15% for testing; `--split spatial` produces
+contiguous column blocks instead.

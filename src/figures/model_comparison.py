@@ -18,7 +18,7 @@ COLORS = {
     "C: RGB + NIR + MNDWI": "#C44E52",
     "D: All channels": "#7F7F7F",
 }
-METRICS = ("Precision", "Recall", "IoU", "F1")
+METRICS = ("Precision", "Recall", "IoU", "F1", "Kappa")
 
 
 def load_json(path: Path) -> dict:

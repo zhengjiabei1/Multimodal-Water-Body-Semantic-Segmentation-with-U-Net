@@ -14,13 +14,14 @@ import rasterio
 from rasterio.windows import Window
 
 REGIONS = (
-    {"name": "River confluence", "x": 1800, "y": 2100},
-    {"name": "Reservoir", "x": 900, "y": 6000},
-    {"name": "Wetland / lake", "x": 6300, "y": 4500},
+    {"name": "Main channel and confluence", "x": 1800, "y": 2100},
+    {"name": "Fragmented water bodies", "x": 6300, "y": 4500},
+    {"name": "Built-up area", "x": 4800, "y": 4800},
 )
 SCHEMES = ("A", "B", "C")
 COL_TITLES = (
-    "RGB image",
+    "Original image",
+    "False colour composite",
     "Reference mask",
     "U-Net A\n(RGB)",
     "U-Net B\n(+NIR)",
@@ -28,9 +29,18 @@ COL_TITLES = (
 )
 
 
-def read_window(path: Path, window: Window, indexes: list[int] | None = None) -> np.ndarray:
+def read_window(
+    path: Path, window: Window, indexes: list[int] | None = None
+) -> np.ndarray:
     with rasterio.open(path) as src:
         return src.read(indexes=indexes, window=window)
+
+
+def overlay_mask(background: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    """Draw water pixels in blue over a false colour composite."""
+    output = background.copy()
+    output[mask > 0.5] = (0.03, 0.10, 0.55)
+    return output
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,19 +49,27 @@ def parse_args() -> argparse.Namespace:
         "--image", type=Path, default=Path("data/raw/Leshan_RGB.tif")
     )
     parser.add_argument(
+        "--stack",
+        type=Path,
+        default=Path("data/raw/Leshan_AllBands.tif"),
+        help="Seven-channel stack used for the false colour composite.",
+    )
+    parser.add_argument(
         "--label",
         type=Path,
         default=Path("data/raw/Leshan_JRC_WaterLabel.tif"),
     )
     parser.add_argument(
-        "--predictions", type=Path, default=Path("outputs"),
+        "--predictions",
+        type=Path,
+        default=Path("outputs"),
         help="Directory containing water_A.tif, water_B.tif and water_C.tif.",
     )
     parser.add_argument("--patch-size", type=int, default=300)
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("docs/figures/qualitative_comparison.png"),
+        default=Path("outputs/qualitative_examples.png"),
     )
     return parser.parse_args()
 
@@ -61,7 +79,7 @@ def main() -> None:
     size = args.patch_size
 
     fig, axes = plt.subplots(
-        len(REGIONS), 5, figsize=(16, 4.3 * len(REGIONS))
+        len(REGIONS), 6, figsize=(19, 4.3 * len(REGIONS))
     )
 
     for row, region in enumerate(REGIONS):
@@ -70,10 +88,31 @@ def main() -> None:
         rgb = read_window(args.image, window)
         rgb = np.transpose(rgb[:3], (1, 2, 0))
         axes[row, 0].imshow(np.clip(rgb * 3, 0, 1))
+
+        # Standard false colour composite: NIR, red and green.
+        stack = read_window(args.stack, window, [4, 3, 2])
+        false_colour = np.transpose(np.clip(stack * 3, 0, 1), (1, 2, 0))
+        axes[row, 1].imshow(false_colour)
+
+        reference = read_window(args.label, window)[0]
+        axes[row, 2].imshow(reference > 0.5, cmap="gray", vmin=0, vmax=1)
+
+        for column, scheme in enumerate(SCHEMES, start=3):
+            path = args.predictions / f"water_{scheme}.tif"
+            prediction = read_window(path, window)[0]
+            axes[row, column].imshow(overlay_mask(false_colour, prediction))
+
+        for column in range(6):
+            axes[row, column].set_xticks([])
+            axes[row, column].set_yticks([])
+            if row == 0:
+                axes[row, column].set_title(COL_TITLES[column], fontsize=11)
+
+        row_label = region["name"]
         axes[row, 0].text(
             -0.08,
             0.5,
-            region["name"],
+            row_label,
             transform=axes[row, 0].transAxes,
             rotation=90,
             ha="right",
@@ -82,26 +121,6 @@ def main() -> None:
             fontweight="bold",
         )
 
-        reference = read_window(args.label, window)[0]
-        axes[row, 1].imshow(reference > 0.5, cmap="Blues", vmin=0, vmax=1)
-
-        for column, scheme in enumerate(SCHEMES, start=2):
-            path = args.predictions / f"water_{scheme}.tif"
-            prediction = read_window(path, window)[0]
-            axes[row, column].imshow(prediction > 0.5, cmap="Blues", vmin=0, vmax=1)
-
-        for column in range(5):
-            axes[row, column].set_xticks([])
-            axes[row, column].set_yticks([])
-            if row == 0:
-                axes[row, column].set_title(COL_TITLES[column], fontsize=11)
-
-    fig.suptitle(
-        "Water segmentation results for representative sub-regions",
-        fontsize=14,
-        fontweight="bold",
-        y=1.0,
-    )
     fig.tight_layout()
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

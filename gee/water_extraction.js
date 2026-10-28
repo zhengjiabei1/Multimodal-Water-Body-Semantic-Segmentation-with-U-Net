@@ -4,7 +4,8 @@
 // appends the NDWI and MNDWI indices, and exports three rasters:
 //   1. Leshan_AllBands      - 7-channel model input (B2, B3, B4, B8, B11, NDWI, MNDWI)
 //   2. Leshan_RGB           - true colour preview
-//   3. Leshan_JRC_WaterLabel - binary water reference from the JRC global surface water dataset
+//   3. Leshan_JRC_WaterLabel - initial binary water extent from the JRC global surface
+//      water dataset, later inspected and corrected in QGIS
 //
 // Run this script in the Google Earth Engine Code Editor and start the three
 // export tasks from the Tasks panel.
@@ -19,6 +20,7 @@ print('Study area (km2):', studyArea.area().divide(1e6));
 
 // ---------------------------------------------------------------------------
 // Select low-cloud Sentinel-2 scenes from late summer 2025.
+// Five scenes met the cloud-cover criterion in this study.
 // ---------------------------------------------------------------------------
 var collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
   .filterBounds(studyArea)

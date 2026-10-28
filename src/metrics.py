@@ -32,10 +32,19 @@ def compute_metrics(
     iou = tp / (tp + fp + fn) if (tp + fp + fn) else 0.0
     f1 = 2 * tp / (2 * tp + fp + fn) if (2 * tp + fp + fn) else 0.0
 
+    total = tp + tn + fp + fn
+    expected = (
+        ((tp + fp) * (tp + fn) + (fn + tn) * (fp + tn)) / (total * total)
+        if total
+        else 0.0
+    )
+    kappa = (accuracy - expected) / (1 - expected) if expected < 1 else 0.0
+
     return {
         "Accuracy": float(accuracy),
         "Precision": float(precision),
         "Recall": float(recall),
         "IoU": float(iou),
         "F1": float(f1),
+        "Kappa": float(kappa),
     }

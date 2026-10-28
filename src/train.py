@@ -69,6 +69,14 @@ class PatchDataset(Dataset):
             if torch.rand(1).item() > 0.5:
                 image = np.flip(image, axis=1).copy()
                 label = np.flip(label, axis=0).copy()
+            if torch.rand(1).item() > 0.5:
+                rotations = torch.randint(1, 4, (1,)).item()
+                image = np.rot90(image, rotations, axes=(1, 2)).copy()
+                label = np.rot90(label, rotations).copy()
+            if self.raw_positions and torch.rand(1).item() > 0.3:
+                factor = 1 + (torch.rand(1).item() - 0.5) * 0.2
+                for position in self.raw_positions:
+                    image[position] = np.clip(image[position] * factor, 0, 1)
             if self.raw_positions and torch.rand(1).item() > 0.5:
                 position = random.choice(self.raw_positions)
                 image[position] = np.clip(
